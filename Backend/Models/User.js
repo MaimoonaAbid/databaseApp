@@ -4,9 +4,9 @@ const sequelize = require('../Configurations/squelize-db'); // Import your Seque
 
 const User = sequelize.define('User', {
   id: {
-    type: DataTypes.INTEGER, // Use INTEGER for auto-incrementing primary key
+    type: DataTypes.INTEGER, 
     primaryKey: true,
-    autoIncrement: true, // Enable auto-increment
+    autoIncrement: true, 
   },
   name: {
     type: DataTypes.STRING,
@@ -14,7 +14,7 @@ const User = sequelize.define('User', {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: true, // allowNull true because unique constraint is handled separately
+    allowNull: true, 
     unique: true,
   },
   password: {
@@ -27,19 +27,19 @@ const User = sequelize.define('User', {
   },
   db_created: {
     type: DataTypes.BOOLEAN,
-    defaultValue: false, // Set to false by default
+    defaultValue: false, 
   },
   db_name: {
-    type: DataTypes.STRING, // Assuming you want to store the database name as a string
-    allowNull: true, // You can set it to allowNull true or false as per your requirements
+    type: DataTypes.STRING, 
+    allowNull: true, 
   },
   otp: {
-    type: DataTypes.STRING, // Assuming you want to store OTP as a string
-    allowNull: true, // You can set it to allowNull true or false as per your requirements
+    type: DataTypes.STRING, 
+    allowNull: true, 
   },
   verified: {
     type: DataTypes.BOOLEAN,
-    defaultValue: false, // Set to false by default
+    defaultValue: false, 
   },
 }); 
 

@@ -7,11 +7,12 @@ export const register = async (userData)=>{
     try 
     {
         const response = await axios.post( `${baseUrl}/user/register`, userData)
+        console.log("API Response",response);
         return response.data
      }
     catch(error)
     {
-        throw error.response.data;
+        throw error
     }    
 };
 
@@ -21,11 +22,12 @@ export const login = async (userData) =>
 {
     try{
        const  response = await axios.post(`${baseUrl}/user/login`, userData)
+       console.log(response)
        return response.data;
     }
     catch(error)
     {
-        throw error.response.data;
+        throw error;
     }
 };
 

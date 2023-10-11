@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { register, login , verifyOTP } from '../../API_service';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './LandingPage.css';
+import axios from 'axios';
 import OTPForm from '../OtpForm/OtpForm'; // Import the OTPForm component
 //import { localStorage } from 'localStorage'; 
 
@@ -18,15 +19,20 @@ function LandingPage() {
     role: 'user',
   });
   const [showOTPForm, setShowOTPForm] = useState(false);
+  // const [loginError, setLoginError] = useState({
+  //   emailError: "",
+  //   passwordError: "",
+  // })
+
+  const [emailError, setEmailError] = useState('')
+  const [loginError, setLoginError] = useState('');
+  // const [LoginemailError, setLoginEmailError] = useState('')
+  // const [passwordError, setPasswordError] = useState('')
+
 
   // State for error messages
-  const [errorMessages, setErrorMessages] = useState({
-    username: '',
-    email: '',
-    password: '',
-    general: '', // Generic error message
-  });
-
+  const [errorMessages, setErrorMessages] = useState([]);
+ 
   const toggleForm = () => {
     setIsSignUp(!isSignUp); // Toggling between signup and login mode
   };
@@ -64,79 +70,109 @@ function LandingPage() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     try {
+      console.log("before", isSignUp);
       if (isSignUp) {
         formData.name = formData.username;
-        const response = await register(formData);
-        if (response.error) {
-          if (response.error === 'A user with this email already exists'){
-            setErrorMessages({
-              ...errorMessages,
-              email: 'A user with this email already exists.',
-            });
-          } else if (response.error === 'New user registration failed') {
-            setErrorMessages({
-              ...errorMessages,
-              general: 'User registration failed. Please try again later.',
-            });
+        // const response = await register(formData);
+        console.log("before api call")
+        const response = await axios.post( `http://localhost:3001/api/user/register`, formData)
+        console.log("resp", response);
+        if (response && response.data)
+         {
+          if (response.data.error === 'A user with this email already exists')
+          {
+            console.log("inside if user email");
+            setEmailError("A user with this email already exists")
           } 
-          else {
-            // Handle other registration errors
-            setErrorMessages({
-              ...errorMessages,
-              general: 'Registration error. Please try again later.',
-            });
+          else{
+            console.log("else", response)
+            console.log('User registered successfully:', response.existingUser);
+            setShowOTPForm(true);
+            // Redirecting to the login page after registration
+            setIsSignUp(false); // Switch to the login form
           }
-        } else{
-          console.log(response)
-          console.log('User registered successfully:', response.existingUser);
-          setShowOTPForm(true);
-          // Redirecting to the login page after registration
-          setIsSignUp(false); // Switch to the login form
         }
-        
-      } else {
-        // Handling login logic
-        const response = await login(formData);
-        console.log('Login response:', response); 
-        if (response.userExists && response.userExists.role) {
-          if (response.userExists.role === 'admin') {
-            navigate('/AdminPage'); // Redirecting to adminpage
-          } else {
-            navigate('/UserPage'); // Redirecting to user user page
+         
+      } 
+      else{
+        //Handling login logic
+         console.log('Login response:');
+         try {
+          //const response = await login(formData);
+          console.log("Inside login try block") 
+         const  response = await axios.post(`http://localhost:3001/api/user/login`, formData)
+         console.log(response)
+          if (response && response.data) {
+            console.log("inside if", response.data.error)  
+            if (response.data.error === 'User email or password is wrong')
+            {
+              console.log("inside if user login");
+              setLoginError("User email or password is wrong")
+            }
+            else if (response.data.userExists && response.data.userExists.role){
+         // Login was successful, redirect based on user role
+         if (response.data.userExists.role === 'admin') {
+        navigate('/AdminPage');
+         } else {
+         navigate('/UserPage');
+         }
+            }
+            else {
+              // Handle any other cases here or show a generic error
+              setErrorMessages(['Login failed.']);
+            }
+            
           }
-        } else {
-          // Handle login errors
-          if (response.error === 'No user with this email exists') {
-            setErrorMessages({
-              ...errorMessages,
-              email: 'User with this email does not exist.',
-            });
-          } else if (response.error === 'Incorrect password') {
-            setErrorMessages({
-              ...errorMessages,
-              password: 'Incorrect password.',
-            });
-          } else {
-            // Generic error message
-            setErrorMessages({
-              ...errorMessages,
-              general: 'Login error. Please try again later.',
-            });
-          }
+           
+        } catch (error) {
+          console.error('API request failed:', error);
         }
       }
-    } catch (error) {
+      // else {
+      //   // Handling login logic
+      //   console.log('Login response:'); 
+      //   try {
+      //     const  response = await login(formData);
+      //    //const  response = await axios.post(`http://localhost:3001/api/user/login`, formData)
+      //     console.log('login response', response);
+          
+      //   } catch (error) {
+      //      console.log("error. error", error);
+      //   }
+      //   const response = await login(formData)
+      //   if (response.userExists) {
+      //     if (response.userExists.role === 'admin') {
+      //       navigate('/AdminPage'); // Redirecting to adminpage
+      //     } else {
+      //       navigate('/UserPage'); // Redirecting to user user page
+      //     }
+      //   } else {
+      //     // Handle login errors
+        
+      //     console.log("login error");
+      //     if (response.error === 'No user with this email exists') {
+      //       console.log("if login error", response)
+      //       setLoginEmailError("User with this email does not exist.")
+      //       //setErrorMessages(['User with this email does not exist.']);
+      //     } else if (response.error === 'Incorrect password') {
+      //       setPasswordError("Incorrect password")
+      //       //setErrorMessages(['Incorrect password.']);
+      //     } else {
+      //       // Generic error message
+      //       setErrorMessages(['Login error. Please try again later.']);
+      //     }
+      //   }
+      // }
+    } 
+    catch (error) {
       console.error('API request failed:', error);
-      setErrorMessages({
-        ...errorMessages,
-        general: 'API request failed. Please try again later.', // Set a generic error message
-      });
+      setErrorMessages(['API request failed. Please try again later.']);
     }
   };
  // Callback function to handle OTP submission
  const handleOTPSubmission = async (otp) => {
+  const newErrorMessages = []; 
   try {
     // Make an API request to verify the OTP
     const response = await verifyOTP({ email: formData.email, otp }); // Replace with your API call
@@ -149,12 +185,14 @@ function LandingPage() {
     } else {
       // Handle OTP verification failure
       console.log('OTP verification failed');
+      newErrorMessages.push('OTP verification failed');
       // You can display an error message or take other actions as needed
     }
   } catch (error) {
     console.error('OTP verification error:', error);
-    // Handle error
+    newErrorMessages.push('OTP verification error.');
   }
+  setErrorMessages(newErrorMessages);
 };
 
   return (
@@ -196,9 +234,9 @@ function LandingPage() {
                   onChange={handleInputChange}
                   required
                 />
-                {/* Render email error message */}
-                {errorMessages.email && <div className="error">{errorMessages.email}</div>}
-                <div className="error">{errorMessages.email}</div>
+                 {/* Render email error message */}
+                 {emailError && <div className="error-messages">{emailError}</div>}
+                {/* <div className='error-messages'> {emailError}</div> */}
               </div>
 
               <div className="mb-3">
@@ -216,14 +254,9 @@ function LandingPage() {
                   title="Password must contain at least 8 characters, including at least one letter, one number, and one special character"
                   required
                 />
-                {/* Render password error message */}
-                {errorMessages.password && <div className="error">{errorMessages.password}</div>}
-                <div className="error">{errorMessages.password}</div>
-              </div>
-
-              {/* Render generic error message */}
-              {errorMessages.general && <div className="error">{errorMessages.general}</div>}
-
+                  
+              </div>              
+              {loginError && <div className="error-messages">{loginError}</div>}
               {isSignUp && (
                 <div className="mb-3">
                   <label className="form-label">Role</label>

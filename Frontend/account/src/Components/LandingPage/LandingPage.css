@@ -2,4 +2,11 @@
 .no-card-border {
     border: none;
   }
-  
+  .error-messages {
+    background-color: #ffcccc; /* Set background color to red */
+    border: 1px solid #ff0000; /* Add a red border */
+    padding: 10px; /* Add some padding around the error messages */
+    margin-bottom: 10px; /* Add margin at the bottom of the container */
+    color: #ff0000; /* Set text color to red */
+    font-weight: bold; /* Make the text bold */
+  }

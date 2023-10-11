@@ -15,66 +15,23 @@ let corsoption = {
     port: process.env.DB_PORT || 5432,
   };
 
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Checking whether email exists or not
-    const userExists = await User.findOne({ where: { email } });
-    
-    if (!userExists) {
-      return res.status(401).json({ error: "The user with this email doesn't exist" });
-    }
-
-    if (userExists.password !== password) {
-      return res.status(401).json({ error: "The password is incorrect" });
-    }
-
-    const { role, db_name } = userExists; // Destructure role and db_name
-       console.log(role, db_name)
-    if (role === 'admin' && db_name) {
-      // User is an admin and has a database assigned
-      const adminDbName = db_name;
-
-      try {
-        // Set up the database connection using adminDbName
-        const adminDb = pgp({ ...connection, database: adminDbName });
-
-        // Send a response indicating a successful login and the connected database name
-        res.status(200).json({ message: "Account logged in successfully", userExists, connectedDb: adminDbName });
-
-        // Don't forget to release the database connection when done
-        adminDb.$pool.end();
-      } catch (dbError) {
-        console.error('Database Connection Error:', dbError);
-        res.status(500).json({ error: 'Database Connection Failed' });
-      }
-    } else {
-      // Handle non-admin user login
-      res.status(200).json({ message: "Account logged in successfully", userExists });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Login Failed' });
-  }
-};
-
+  
 exports.register = async (req, res) => {
   try {
-    // Extract user data from the request body
+    // Extracting user data from the request body
     const { name, email, password, role } = req.body;
 
-    // Check if the email already exists
+    // Checking if the email already exists
     const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
-      return res.status(400).json({ error: 'A user with this email already exists' });
+      res.send({status: 'failed', error: 'A user with this email already exists'})
     }
-
-    // Generate a 6-digit OTP
-    const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCase: false, specialChars: false });
+else{ 
+  const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCase: false, specialChars: false });
 console.log(otp)
 
-    // Create a transporter object using nodemailer
+    // Creating a transporter object using nodemailer
     const transporter = nodemailer.createTransport({
       service: 'gmail', // Replace with your email service (e.g., Gmail)
       auth: {
@@ -87,7 +44,7 @@ console.log(otp)
       debug: true, // Enable debugging
     });
 console.log(transporter)
-    // Define email data
+    // Defining email data
     const mailOptions = {
       from: 'maimoonaabid2000@gmail.com',
       to: email,
@@ -95,10 +52,10 @@ console.log(transporter)
       text: `Your OTP for registration is: ${otp}`,
     };
 
-    // Send the email with OTP
-    await transporter.sendMail(mailOptions);
+    // Sending the email with OTP
+   await transporter.sendMail(mailOptions);
 
-    // Create a new user with OTP data
+    // Creating a new user with OTP data
     const user = await User.create({
       name,
       email,
@@ -110,18 +67,14 @@ console.log(transporter)
       'verified': false,
     });
    console.log(user)
-       // Create a new database for admin users
-    // if (user.role === 'admin') {
-    //   const uniqueDbName = await createAdminDatabase(user);
-    //   user.db_name = uniqueDbName; // Assuming 'db_name' is the correct field name
-    //   await user.save();
-    // }
-
+     
     // User added successfully message response
-    res.status(200).json({ message: 'New user added successfully in the database' });
+    res.status(200).json({ message: 'New user added successfully in the database' });}
+    // Generating a 6-digit OTP
+   
   } catch (error) {
     console.error('Registration Error:', error);
-    res.status(500).json({ error: 'Registration Failed' });
+    res.send({ error: 'Registration Failed' });
   }
 };
 
@@ -160,3 +113,43 @@ exports.verifyOTP = async (req, res) => {
   }
 };
 
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Checking whether email exists or not
+    const userExists = await User.findOne({ where: { email } });
+
+    if (!userExists || userExists.password !== password  ) {
+      //return res.status(401).json({ error: 'No user with this email exists' });
+      res.send({status: 'failed', error: 'User email or password is wrong'})
+    }
+     console.log("after successful login")
+    const { role, db_name } = userExists;
+     console.log("after successfull login", role, db_name)
+    if (role === 'admin' && db_name) {
+      // User is an admin and has a database assigned
+      const adminDbName = db_name;
+
+      try {
+        // Set up the database connection using adminDbName
+        const adminDb = pgp({ ...connection, database: adminDbName });
+
+        // Send a response indicating a successful login and the connected database name
+        res.status(200).json({ message: 'Account logged in successfully', userExists, connectedDb: adminDbName });
+
+        // Don't forget to release the database connection when done
+        adminDb.$pool.end();
+      } catch (dbError) {
+        console.error('Database Connection Error:', dbError);
+        res.status(500).json({ error: 'Database Connection Failed' });
+      }
+    } else {
+      // Handle non-admin user login
+      res.status(200).json({ message: 'Account logged in successfully', userExists}); 
+    }
+  } catch (error) {
+    console.error('Login Error:', error);
+    res.status(401).json({ error: 'Login Failed' });
+  }
+};
