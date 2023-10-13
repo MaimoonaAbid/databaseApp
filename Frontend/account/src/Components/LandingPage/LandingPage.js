@@ -7,60 +7,32 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './LandingPage.css';
 import axios from 'axios';
 import OTPForm from '../OtpForm/OtpForm'; // Import the OTPForm component
-//import { localStorage } from 'localStorage'; 
+import LoginSignUpForm from '../LoginSignUpForm/LoginSignUpForm'; // Import the new component
 
 function LandingPage() {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showOTPForm, setShowOTPForm] = useState(false);
+  const [emailError, setEmailError] = useState('')
+  const [loginError, setLoginError] = useState('');
+  // State for error messages
+  const [errorMessages, setErrorMessages] = useState([]);
   const [formData, setFormData] = useState({
+    // Initialize with default values if needed
     username: '',
     email: '',
     password: '',
     role: 'user',
-  });
-  const [showOTPForm, setShowOTPForm] = useState(false);
-  // const [loginError, setLoginError] = useState({
-  //   emailError: "",
-  //   passwordError: "",
-  // })
-
-  const [emailError, setEmailError] = useState('')
-  const [loginError, setLoginError] = useState('');
-  // const [LoginemailError, setLoginEmailError] = useState('')
-  // const [passwordError, setPasswordError] = useState('')
-
-
-  // State for error messages
-  const [errorMessages, setErrorMessages] = useState([]);
- 
+});
   const toggleForm = () => {
     setIsSignUp(!isSignUp); // Toggling between signup and login mode
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-    
-    // Reset error messages when input changes
-    setErrorMessages({
-      ...errorMessages,
-      [name]: '',
-      general: '', // Reset the generic error message
-    });
   };
 
   const handleGoogleLoginSuccess = (user) => {
     
     navigate('/AdminPage');
     
-    console.log("herr in success", user)
-    // setFormData({
-    //   name: user.profileObj.name,
-    //   email: user.profileObj.email,
-    // });
+    console.log("Google Login success", user)
   };
   
   const handleGoogleLoginFailure = (error) => {
@@ -68,8 +40,8 @@ function LandingPage() {
     console.log("failure: ", error)
     console.log('Google login failed:', error);
   };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (formData) => {
+   // formData.preventDefault();
     try {
       console.log("before", isSignUp);
       if (isSignUp) {
@@ -129,41 +101,7 @@ function LandingPage() {
           console.error('API request failed:', error);
         }
       }
-      // else {
-      //   // Handling login logic
-      //   console.log('Login response:'); 
-      //   try {
-      //     const  response = await login(formData);
-      //    //const  response = await axios.post(`http://localhost:3001/api/user/login`, formData)
-      //     console.log('login response', response);
-          
-      //   } catch (error) {
-      //      console.log("error. error", error);
-      //   }
-      //   const response = await login(formData)
-      //   if (response.userExists) {
-      //     if (response.userExists.role === 'admin') {
-      //       navigate('/AdminPage'); // Redirecting to adminpage
-      //     } else {
-      //       navigate('/UserPage'); // Redirecting to user user page
-      //     }
-      //   } else {
-      //     // Handle login errors
-        
-      //     console.log("login error");
-      //     if (response.error === 'No user with this email exists') {
-      //       console.log("if login error", response)
-      //       setLoginEmailError("User with this email does not exist.")
-      //       //setErrorMessages(['User with this email does not exist.']);
-      //     } else if (response.error === 'Incorrect password') {
-      //       setPasswordError("Incorrect password")
-      //       //setErrorMessages(['Incorrect password.']);
-      //     } else {
-      //       // Generic error message
-      //       setErrorMessages(['Login error. Please try again later.']);
-      //     }
-      //   }
-      // }
+      
     } 
     catch (error) {
       console.error('API request failed:', error);
@@ -203,94 +141,15 @@ function LandingPage() {
             <h1 style={{ color: 'blue', marginBottom: '30px' }}>
               {isSignUp ? 'Sign Up' : 'Login'}
             </h1>
-            <form onSubmit={handleSubmit}>
-              {isSignUp && (
-                <div className="mb-3">
-                  <label htmlFor="username" className="form-label">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              )}
-
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  className="form-control"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-                 {/* Render email error message */}
-                 {emailError && <div className="error-messages">{emailError}</div>}
-                {/* <div className='error-messages'> {emailError}</div> */}
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                  title="Password must contain at least 8 characters, including at least one letter, one number, and one special character"
-                  required
-                />
-                  
-              </div>              
-              {loginError && <div className="error-messages">{loginError}</div>}
-              {isSignUp && (
-                <div className="mb-3">
-                  <label className="form-label">Role</label>
-                  <div>
-                    <label className="form-check-label">
-                      <input
-                        type="radio"
-                        className="form-check-input"
-                        name="role"
-                        value="admin"
-                        checked={formData.role === 'admin'}
-                        onChange={handleInputChange}
-                      />{' '}
-                      Admin
-                    </label>
-                    <label className="form-check-label ms-3 ">
-                      <input
-                        type="radio"
-                        className="form-check-input"
-                        name="role"
-                        value="user"
-                        checked={formData.role === 'user'}
-                        onChange={handleInputChange}
-                      />{' '}
-                      User
-                    </label>
-                  </div>
-                </div>
-              )}
-              <GoogleSignUpButton onSuccess={handleGoogleLoginSuccess} onFailure={handleGoogleLoginFailure} />
-              <button type="submit" className="btn btn-primary">
-                {isSignUp ? 'Sign Up' : 'Login'}
-              </button>
-            </form>
+            <LoginSignUpForm
+             isSignUp={isSignUp}
+             formData={formData}
+             onFormChange={setFormData}
+             onSubmit={handleSubmit}
+             emailError={emailError}
+             loginError={loginError}
+            />
+            <GoogleSignUpButton onSuccess={handleGoogleLoginSuccess} onFailure={handleGoogleLoginFailure} />
             <p>
               {isSignUp ? "Already have an account?" : "Don't have an account?"}
               <button
@@ -303,9 +162,12 @@ function LandingPage() {
               </button>
             </p>
              {/* Render OTPForm conditionally */}
-       {showOTPForm && (
-        <OTPForm onSubmit={handleOTPSubmission} /> // Pass the callback function
-      )}
+            {showOTPForm && (
+        <OTPForm 
+        onSubmit={handleOTPSubmission} 
+        //formData={formData} // Pass formData to OTPForm
+        /> 
+            )}
           </div>
           <div className="col-md-6">
             <img
@@ -320,6 +182,7 @@ function LandingPage() {
     </div>
   );
 }
+
 
 export default LandingPage;
 

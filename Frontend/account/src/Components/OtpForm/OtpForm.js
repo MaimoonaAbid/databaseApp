@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
 
-const OTPForm = ({ onSubmit }) => {
+const OTPForm = ({ onSubmit, formData}) => {
   const [otp, setOtp] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Call the onSubmit callback function with the entered OTP
-    onSubmit(otp);
+    onSubmit(otp, formData);
   };
 
   return (
