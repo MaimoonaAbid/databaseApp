@@ -6,7 +6,7 @@ let corsoption = {
 const User = require('../Models/User'); // Update the import path
 const UserService = require('../Services/UserService'); // New import
 const pgp = require('pg-promise')();
-const createAdminDatabase = require('../controllers/database').createAdminDatabase;
+const createAdminDatabase = require('../Controllers/database').createAdminDatabase;
 const connection = {
   user: process.env.DB_USER || 'postgres',
   host: process.env.DB_HOST || 'localhost',
@@ -16,13 +16,13 @@ const connection = {
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
-    console.log(name,email,password,role)
+    const { name, email, password, role, spaceneeded } = req.body;
+    console.log(name,email,password,role, spaceneeded)
     // Inject the UserService dependency
     const userService = new UserService();
 
    // Create a new user
-    const user = await userService.createUser({ name, email, password, role });
+    const user = await userService.createUser({ name, email, password, role, spaceneeded });
 
     // Send an email with OTP
     await userService.sendEmailWithOTP(user);
@@ -40,14 +40,16 @@ exports.register = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
-
+      console.log(email, otp)
     // Inject the UserService dependency
     const userService = new UserService();
 
     // Verify OTP
     const user = await userService.verifyOTP(email, otp);
+    console.log(user)
     // Create a new database for admin users
     if (user.role === 'admin') {
+      const spaceneeded = user.spaceneeded;
       const uniqueDbName = await createAdminDatabase(user);
       user.db_name = uniqueDbName; // Assuming 'db_name' is the correct field name
       await user.save();

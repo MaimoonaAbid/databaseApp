@@ -3,10 +3,12 @@ import React, { useState } from 'react';
 
 function LoginSignUpForm({ isSignUp, formData, onFormChange, onSubmit, emailError, loginError }) {
       const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type } = e.target;
+        const convertedValue = type === 'number' ? parseInt(value, 10) : value;
         onFormChange({
           ...formData,
           [name]: value,
+          [name]: convertedValue,
         });
       };
 
@@ -96,6 +98,26 @@ function LoginSignUpForm({ isSignUp, formData, onFormChange, onSubmit, emailErro
               User
             </label>
           </div>
+        </div>
+      )}
+
+{formData.role === 'admin' && (
+        <div className="mb-3">
+          <label htmlFor="spaceneeded" className="form-label">
+            Space Needed (MB)
+          </label>
+          <select
+            className="form-control"
+            id="spaceneeded"
+            name="spaceneeded"
+            value={formData.spaceneeded}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="550">550MB</option>
+            <option value="250">250MB</option>
+            <option value="100">100MB</option>
+          </select>
         </div>
       )}
 

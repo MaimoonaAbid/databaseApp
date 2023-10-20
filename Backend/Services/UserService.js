@@ -7,7 +7,7 @@ const otpGenerator = require('otp-generator');
 class UserService {
   constructor() {}
 
-  async createUser({ name, email, password, role }) {
+  async createUser({ name, email, password, role, spaceneeded}) {
     const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
@@ -22,6 +22,7 @@ class UserService {
       'db-created': false,
       'db_name': null,
       'verified': false,
+      spaceneeded, 
     });
 
     return user;

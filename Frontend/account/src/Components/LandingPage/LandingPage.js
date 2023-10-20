@@ -23,6 +23,8 @@ function LandingPage() {
     email: '',
     password: '',
     role: 'user',
+    spaceneeded: '',
+
 });
   const toggleForm = () => {
     setIsSignUp(!isSignUp); // Toggling between signup and login mode
