@@ -8,6 +8,8 @@ import './LandingPage.css';
 import axios from 'axios';
 import OTPForm from '../OtpForm/OtpForm'; // Import the OTPForm component
 import LoginSignUpForm from '../LoginSignUpForm/LoginSignUpForm'; // Import the new component
+import Navbar from '../Navbar/navbar'
+import { setToken } from './AuthenticationService' 
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -76,12 +78,14 @@ function LandingPage() {
           //const response = await login(formData);
           console.log("Inside login try block") 
          const  response = await axios.post(`http://localhost:3001/api/user/login`, formData)
-         console.log(response)
-          if (response && response.data) {
-            console.log("inside if", response.data.error)  
+         console.log('login response',response, response.token)
+          if (response && response.data && response.data.token) {
+            setToken(response.data.token); // Store the received token
+            // console.log("inside if", response.data.error)
             if (response.data.error === 'User email or password is wrong')
             {
-              console.log("inside if user login");
+              console.log("inside if user login", response.data.error);
+                
               setLoginError("User email or password is wrong")
             }
             else if (response.data.userExists && response.data.userExists.role){
@@ -136,7 +140,9 @@ function LandingPage() {
 };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div>  
+      {/* <Navbar />    */}
+       <div className="container d-flex justify-content-center align-items-center vh-100">
       <div className="card no-card-border" style={{ width: '80%' }}>
         <div className="row">
           <div className="col-md-6">
@@ -182,6 +188,8 @@ function LandingPage() {
       </div>
       
     </div>
+    </div>
+   
   );
 }
 

@@ -13,13 +13,13 @@ const connection = {
 const db = pgp(connection);
 
 // Controller function to create a new database with the admin's username and id
-exports.createAdminDatabase = async (user , spaceneeded) => {
+exports.createAdminDatabase = async (user) => {
   try {
     
     const { id, name } = user;
     const uniqueDbName = `${name}_${id}`;
-    const megabytes = spaceneeded; 
-    const bytes = megabytes * 1024 * 1024; // Convert MB to bytes
+    //const megabytes = spaceneeded; 
+    //const bytes = megabytes * 1024 * 1024; // Convert MB to bytes
 
     // Creating the new database
     await db.none(`CREATE DATABASE $1:name;`, [uniqueDbName]);

@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 function LoginSignUpForm({ isSignUp, formData, onFormChange, onSubmit, emailError, loginError }) {
       const handleInputChange = (e) => {
         const { name, value, type } = e.target;
-        const convertedValue = type === 'number' ? parseInt(value, 10) : value;
+       // const convertedValue = type === 'number' ? parseInt(value, 10) : value;
         onFormChange({
           ...formData,
           [name]: value,
-          [name]: convertedValue,
+         // [name]: convertedValue,
         });
       };
 
@@ -101,7 +101,7 @@ function LoginSignUpForm({ isSignUp, formData, onFormChange, onSubmit, emailErro
         </div>
       )}
 
-{formData.role === 'admin' && (
+{/* {formData.role === 'admin' && (
         <div className="mb-3">
           <label htmlFor="spaceneeded" className="form-label">
             Space Needed (MB)
@@ -119,7 +119,7 @@ function LoginSignUpForm({ isSignUp, formData, onFormChange, onSubmit, emailErro
             <option value="100">100MB</option>
           </select>
         </div>
-      )}
+      )} */}
 
       <button type="submit" className="btn btn-primary" style={{ marginBottom: '30px' }}>
         {isSignUp ? 'Sign Up' : 'Login'}
